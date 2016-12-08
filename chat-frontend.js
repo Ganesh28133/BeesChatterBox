@@ -24,12 +24,13 @@ $(function () {
     }
  
     // open connection
-    var connection = new WebSocket('ws://192.168.5.28:1333');
+    var connection = new WebSocket('ws://192.168.4.141:1333');
  
     connection.onopen = function () {
         // first we want users to enter their names
         input.removeAttr('disabled');
         status.text('Choose name:');
+		$("#input").focus();
     };
  
     connection.onerror = function (error) {
@@ -70,6 +71,7 @@ $(function () {
         } else {
             console.log('Hmm..., I\'ve never seen JSON like this: ', json);
         }
+		$("#input").select();
     };
  
     /**
@@ -111,10 +113,29 @@ $(function () {
     /**
      * Add message to the chat window
      */
+	 
+	var author = null;
+	var senttime = null;
+	var message = null;
+	 
+	function Message(author, dt, message){
+		this.authour = author;
+		this.senttime = new Date(dt);
+		this.message = message;
+	}
+
+
     function addMessage(author, message, color, dt) {
-        content.prepend('<p><span style="color:' + color + '">' + author + '</span> @ ' +
-             + (dt.getHours() < 10 ? '0' + dt.getHours() : dt.getHours()) + ':'
-             + (dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes())
-             + ': ' + message + '</p>');
+		var userMessage = new Message(author, dt, message);
+		var text = (userMessage.senttime.getHours() < 10 ? '0' + userMessage.senttime.getHours() : userMessage.senttime.getHours()) + ':'
+             + (userMessage.senttime.getMinutes() < 10 ? '0' + userMessage.senttime.getMinutes() : userMessage.senttime.getMinutes())
+             + ': ' + userMessage.message + '';
+		storedata(userMessage);
+        content.prepend('<p><span style="color:' + color + '">' + author + '</span> @ ' + text + '</p>');
     }
+	
+	function storedata(objMessage){
+		localStorage.setItem(objMessage.author+ ' ' +objMessage.senttime.toISOString(), JSON.stringify(objMessage));
+		console.log(objMessage.author+ ' ' +objMessage.senttime.toISOString(), JSON.stringify(objMessage));
+	}
 });
